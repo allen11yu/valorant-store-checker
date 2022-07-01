@@ -1,12 +1,37 @@
 import { React, useState } from "react";
 import { Form, FloatingLabel, Spinner } from "react-bootstrap";
+import { useHistory } from "react-router-dom";
 
-function LoginPage() {
+function LoginPage({ setIsLoginCallback }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [wrongLoginInfo, setWrongLoginInfo] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const history = useHistory();
+
+  const handleError = (
+    <p className="error-msg">Please check your username or password.</p>
+  );
 
   const handleLogin = () => {
-    //setIsLoading(true);
-    console.log("Logging in!");
+    if (username === "" || password === "") {
+      setWrongLoginInfo(true);
+      setIsLoading(false);
+    } else {
+      setWrongLoginInfo(false);
+      setIsLoading(true);
+      // fetch
+      // if successfull
+      console.log("Logging in!");
+      console.log(username);
+      console.log(password);
+      setIsLoginCallback(true);
+      history.push("/store");
+
+      // not sucessful, display error message
+
+      // no matter what, setIsLoading(false);
+    }
   };
 
   let loadingOrNot = null;
@@ -14,7 +39,7 @@ function LoginPage() {
     loadingOrNot = <Spinner animation="border" />;
   } else {
     loadingOrNot = (
-      <button className="login-btn" type="button" onClick={handleLogin}>
+      <button className="action-btn" type="button" onClick={handleLogin}>
         Login
       </button>
     );
@@ -31,16 +56,30 @@ function LoginPage() {
             label="Username"
             className="mb-3"
           >
-            <Form.Control size="lg" type="text" placeholder="Username" />
+            <Form.Control
+              size="lg"
+              type="text"
+              placeholder="Username"
+              onChange={(e) => {
+                setUsername(e.target.value);
+              }}
+            />
           </FloatingLabel>
           <FloatingLabel controlId="floatingPassword" label="Password">
-            <Form.Control size="lg" type="password" placeholder="Password" />
+            <Form.Control
+              size="lg"
+              type="password"
+              placeholder="Password"
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
           </FloatingLabel>
           <br />
           {loadingOrNot}
+          {wrongLoginInfo ? handleError : <div></div>}
         </Form>
       </div>
-      <div className="additional-info"></div>
     </div>
   );
 }
