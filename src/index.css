@@ -120,26 +120,34 @@ h2 {
 /*
   TESTING
 */
+.accordion-container {
+  width: 50%;
+  margin: auto;
+  margin-top: 40px;
+}
+
 .skin-card {
   background-color: #364966;
   padding: 12px;
-  width: 50%;
+  width: 60%;
+  margin: auto;
+  margin-top: 12px
 }
 
 .info-text {
   color: white;
-  font-size: 24px;
+  font-size: 16px;
   margin: 0;
-}
-
-.skin-info {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
 }
 
 .skin-img img {
   display: block;
   margin: auto;
   width: 80%;
+}
+
+.skin-info {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
