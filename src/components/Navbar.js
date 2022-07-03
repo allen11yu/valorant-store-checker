@@ -11,8 +11,8 @@ function Navbar() {
         <Link className="menu-item" to="/store">
           Store
         </Link>
-        <Link className="menu-item" to="/skins">
-          Skins
+        <Link className="menu-item" to="/bundles">
+          Bundles
         </Link>
         <Link className="menu-item" to="/notify">
           Notify

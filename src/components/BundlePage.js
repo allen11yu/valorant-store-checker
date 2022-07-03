@@ -1,10 +1,10 @@
 import React from "react";
 import SkinList from "./SkinList";
 
-function SkinPage() {
+function BundlePage() {
   return (
     <div className="skin-page page-padding">
-      <h1 className="valorant-heading center">VALORANT SKINS</h1>
+      <h1 className="valorant-heading center">VALORANT Bundles</h1>
       <h2 className="center">Star the skin if you wish to be notify</h2>
       <div className="accordion-container">
         <SkinList />
@@ -13,4 +13,4 @@ function SkinPage() {
   );
 }
 
-export default SkinPage;
+export default BundlePage;

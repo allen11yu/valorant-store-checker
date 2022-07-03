@@ -7,7 +7,7 @@ import Navbar from "./Navbar";
 import AboutPage from "./AboutPage";
 import LoginPage from "./LoginPage";
 import StorePage from "./StorePage";
-import SkinPage from "./SkinPage";
+import BundlePage from "./BundlePage";
 import NotifyPage from "./NotifyPage";
 
 function App() {
@@ -37,8 +37,8 @@ function App() {
           )}
         </Route>
 
-        <Route exact path="/skins">
-          <SkinPage />
+        <Route exact path="/bundles">
+          <BundlePage />
         </Route>
 
         <Route exact path="/notify">

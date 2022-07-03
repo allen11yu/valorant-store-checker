@@ -6,11 +6,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as outlineStar } from "@fortawesome/free-regular-svg-icons";
 import { faStar as filledStar } from "@fortawesome/free-solid-svg-icons";
 
-function SkinCard({ weaponSkins }) {
+function SkinCard({ bundleSkins }) {
   let skinCards = [];
-  skinCards = weaponSkins.map((skin, index) => {
+  skinCards = bundleSkins.map((skin, index) => {
     let icon = skin.chromas[0].fullRender;
-    let name = skin.displayName;
+    let name = skin.name;
+    let price = skin.price;
 
     return (
       <div className="skin-card" key={index}>
@@ -19,6 +20,7 @@ function SkinCard({ weaponSkins }) {
         </div>
         <div className="skin-info">
           <p className="info-text">{name}</p>
+          <p className="info-text">VP: {price}</p>
           <FontAwesomeIcon className="info-text" icon={outlineStar} />
         </div>
       </div>
@@ -28,13 +30,13 @@ function SkinCard({ weaponSkins }) {
 }
 
 function SkinList() {
-  const [weapons, setWeapons] = useState([]);
+  const [bundles, setBundles] = useState([]);
 
-  const fetchWeapons = async () => {
-    await fetch("https://valorant-api.com/v1/weapons")
+  const fetchBundles = async () => {
+    await fetch("https://api.valtracker.gg/bundles")
       .then((res) => res.json())
       .then((data) => {
-        setWeapons(data.data);
+        setBundles(data.data);
       })
       .catch((err) => {
         console.log(err);
@@ -42,18 +44,18 @@ function SkinList() {
   };
 
   useEffect(() => {
-    fetchWeapons();
+    fetchBundles();
   }, []);
 
-  console.log(weapons);
+  console.log(bundles);
   let skinCards = [];
-  if (weapons.length > 0) {
-    skinCards = weapons.map((weapon, index) => {
+  if (bundles.length > 0) {
+    skinCards = bundles.map((bundle, index) => {
       return (
         <Accordion.Item eventKey={index.toString()} key={index}>
-          <Accordion.Header>{weapon.displayName}</Accordion.Header>
+          <Accordion.Header>{bundle.name}</Accordion.Header>
           <Accordion.Body>
-            <SkinCard weaponSkins={weapon.skins} />
+            <SkinCard bundleSkins={bundle.weapons} />
           </Accordion.Body>
         </Accordion.Item>
       );
