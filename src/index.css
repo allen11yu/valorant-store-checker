@@ -118,14 +118,8 @@ h2 {
 }
 
 /*
-  TESTING
+  Styling for bundle page
 */
-.accordion-container {
-  width: 50%;
-  margin: auto;
-  margin-top: 40px;
-}
-
 .skin-card {
   background-color: #364966;
   padding: 12px;
@@ -143,11 +137,30 @@ h2 {
 .skin-img img {
   display: block;
   margin: auto;
-  width: 80%;
+  height: 5vw;
 }
 
 .skin-info {
   display: flex;
   justify-content: space-around;
   align-items: center;
+}
+
+.skin-container {
+  width: 50%;
+  margin: auto;
+  margin-top: 40px;
+}
+
+/*
+  Styling for notify page
+*/
+.phone-form-container {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.phone-action-btn {
+  margin-left: 10px;
 }

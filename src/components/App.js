@@ -12,6 +12,23 @@ import NotifyPage from "./NotifyPage";
 
 function App() {
   const [isLogin, setIsLogin] = useState(false);
+  const [selectedSkins, setSelectedSkins] = useState(new Map());
+
+  const handleSelect = (uuid, skin) => {
+    let temp = new Map(selectedSkins);
+    console.log("im clicked");
+
+    if (temp.has(uuid)) {
+      console.log("deselecting skin");
+      temp.delete(uuid);
+    } else {
+      console.log("selecting skin");
+      temp.set(uuid, skin);
+    }
+    console.log(temp);
+    setSelectedSkins(temp);
+  };
+
   //{isLogin ? <StorePage setIsLoginCallback={setIsLogin} /> : <Redirect to="/login" />} replace under /store route
   return (
     <Switch>
@@ -38,11 +55,17 @@ function App() {
         </Route>
 
         <Route exact path="/bundles">
-          <BundlePage />
+          <BundlePage
+            handleSelectCallback={handleSelect}
+            selectedSkins={selectedSkins}
+          />
         </Route>
 
         <Route exact path="/notify">
-          <NotifyPage />
+          <NotifyPage
+            handleSelectCallback={handleSelect}
+            selectedSkins={selectedSkins}
+          />
         </Route>
       </Route>
     </Switch>

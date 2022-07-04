@@ -6,12 +6,42 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as outlineStar } from "@fortawesome/free-regular-svg-icons";
 import { faStar as filledStar } from "@fortawesome/free-solid-svg-icons";
 
-function SkinCard({ bundleSkins }) {
+function SkinCards({ bundleSkins, handleSelectCallback, selectedSkins }) {
   let skinCards = [];
   skinCards = bundleSkins.map((skin, index) => {
+    let uuid = skin.uuid;
     let icon = skin.chromas[0].fullRender;
     let name = skin.name;
     let price = skin.price;
+
+    let skinObj = {
+      "name": name,
+      "price": price,
+      "icon": icon,
+      "index": index
+    }
+    let starStatus = null;
+    if (selectedSkins.has(uuid)) {
+      starStatus = (
+        <FontAwesomeIcon
+          className="info-text"
+          icon={filledStar}
+          onClick={() => {
+            handleSelectCallback(uuid, skinObj);
+          }}
+        />
+      );
+    } else {
+      starStatus = (
+        <FontAwesomeIcon
+          className="info-text"
+          icon={outlineStar}
+          onClick={() => {
+            handleSelectCallback(uuid, skinObj);
+          }}
+        />
+      );
+    }
 
     return (
       <div className="skin-card" key={index}>
@@ -21,16 +51,17 @@ function SkinCard({ bundleSkins }) {
         <div className="skin-info">
           <p className="info-text">{name}</p>
           <p className="info-text">VP: {price}</p>
-          <FontAwesomeIcon className="info-text" icon={outlineStar} />
+          {starStatus}
         </div>
       </div>
     );
   });
-  return <div className="skin-container">{skinCards}</div>;
+  return <div>{skinCards}</div>;
 }
 
-function SkinList() {
+function SkinList({ handleSelectCallback, selectedSkins }) {
   const [bundles, setBundles] = useState([]);
+  const exclusiveBundles = ["Champions 2021", "Arcane"];
 
   const fetchBundles = async () => {
     await fetch("https://api.valtracker.gg/bundles")
@@ -47,15 +78,23 @@ function SkinList() {
     fetchBundles();
   }, []);
 
-  console.log(bundles);
   let skinCards = [];
+  let filteredBundles = [...bundles];
   if (bundles.length > 0) {
-    skinCards = bundles.map((bundle, index) => {
+    filteredBundles = bundles.filter((bundle) => {
+      return !exclusiveBundles.includes(bundle.name);
+    });
+
+    skinCards = filteredBundles.map((bundle, index) => {
       return (
         <Accordion.Item eventKey={index.toString()} key={index}>
           <Accordion.Header>{bundle.name}</Accordion.Header>
           <Accordion.Body>
-            <SkinCard bundleSkins={bundle.weapons} />
+            <SkinCards
+              bundleSkins={bundle.weapons}
+              handleSelectCallback={handleSelectCallback}
+              selectedSkins={selectedSkins}
+            />
           </Accordion.Body>
         </Accordion.Item>
       );
