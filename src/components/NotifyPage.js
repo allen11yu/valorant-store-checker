@@ -1,4 +1,5 @@
 import { React, useState } from "react";
+import validator from "validator";
 import { Form, FloatingLabel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as filledStar } from "@fortawesome/free-solid-svg-icons";
@@ -7,7 +8,7 @@ function SkinCards({ handleSelectCallback, selectedSkins }) {
   let skinCards = [];
   for (let [uuid, skin] of selectedSkins.entries()) {
     let skinCard = (
-      <div className="skin-card" key={skin.index}>
+      <div className="skin-card" key={uuid}>
         <div className="skin-img">
           <img src={skin.icon} alt={skin.name}></img>
         </div>
@@ -31,18 +32,30 @@ function SkinCards({ handleSelectCallback, selectedSkins }) {
 
 function NotifyPage({ handleSelectCallback, selectedSkins }) {
   const [phone, setPhone] = useState("");
-  const [disable, setDisable] = useState(true);
+  const [disable, setDisable] = useState(false);
+  const [wrongPhone, setWrongPhone] = useState(false);
+
+  const handleWrongPhone = (
+    <p className="error-msg center">Please check your phone number.</p>
+  );
 
   const handleEdit = () => {
-    console.log("editing");
+    setDisable(false);
   };
 
   const handleSave = () => {
-    console.log("save");
+    if (validator.isMobilePhone(phone, ["en-US"])) {
+      console.log("valid phone number");
+      setWrongPhone(false);
+      setDisable(true);
+    } else {
+      console.log("not valid phone number");
+      setWrongPhone(true);
+    }
   };
 
   let editOrSave = null;
-  if (phone.length !== 10) {
+  if (!disable) {
     editOrSave = (
       <button className="action-btn" type="button" onClick={handleSave}>
         Save
@@ -75,12 +88,15 @@ function NotifyPage({ handleSelectCallback, selectedSkins }) {
                 onChange={(e) => {
                   setPhone(e.target.value);
                 }}
+                disabled={disable}
+                readOnly={disable}
               />
             </FloatingLabel>
           </Form>
         </div>
         <div className="phone-action-btn">{editOrSave}</div>
       </div>
+      {wrongPhone ? handleWrongPhone : <div></div>}
       <SkinCards
         handleSelectCallback={handleSelectCallback}
         selectedSkins={selectedSkins}

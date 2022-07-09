@@ -61,7 +61,7 @@ function SkinCards({ bundleSkins, handleSelectCallback, selectedSkins }) {
 
 function SkinList({ handleSelectCallback, selectedSkins }) {
   const [bundles, setBundles] = useState([]);
-  const exclusiveBundles = ["Champions 2021", "Arcane"];
+  const exclusiveBundles = ["Champions 2021", "Arcane", "Pride"];
 
   const fetchBundles = async () => {
     await fetch("https://api.valtracker.gg/bundles")
