@@ -40,14 +40,25 @@ body {
   padding: 20px;
 }
 
-.center {
-  text-align: center;
-}
-
 .form-container {
   margin: auto;
   width: 50%;
   margin-top: 20px;
+}
+
+.learn-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.learn-more {
+  color: #042e27;
+  transition-duration: 0.2s;
+}
+
+.learn-more:hover {
+  color: white;
 }
 
 /*
@@ -183,4 +194,37 @@ h2 {
 
 .phone-action-btn {
   margin-left: 10px;
+}
+
+/*
+  Styling for about page
+*/
+.about-text-container {
+  margin: auto;
+  width: 50%;
+}
+
+.about-page p {
+  font-size: 20px;
+  color: #042e27;
+}
+
+.social-container {
+  display: flex;
+  justify-content: center;
+}
+
+.social {
+  font-size: 40px;
+  margin: 10px;
+  color: #042e27;
+  transition-duration: 0.2s;
+}
+
+.social:hover {
+  color: white;
+}
+
+.about-page a {
+  color: white;
 }

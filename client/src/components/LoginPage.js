@@ -1,6 +1,7 @@
 import { React, useState } from "react";
 import { Form, FloatingLabel, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function LoginPage({
   setIsLoginCallback,
@@ -11,8 +12,8 @@ function LoginPage({
   isLoading,
 }) {
   const [wrongLoginInfo, setWrongLoginInfo] = useState(false);
-  const [username, setUsername] = useState("imafan13");
-  const [password, setPassword] = useState("Valorantpassword1");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const history = useHistory();
 
   const handleData = (data) => {
@@ -38,7 +39,10 @@ function LoginPage({
       .then((data) => {
         handleData(data);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setWrongLoginInfo(true);
+        setIsLoadingCallback(false);
+      });
   };
 
   const handleError = (
@@ -52,19 +56,7 @@ function LoginPage({
     } else {
       setWrongLoginInfo(false);
       setIsLoadingCallback(true);
-
-      console.log("Logging in!");
-
-
       userLogin(username, password);
-      //setIsLoginCallback(true); //remove
-      //history.push("/store"); //remove
-      // fetch
-      // if successfull
-
-      // not sucessful, display error message
-
-      // no matter what, setIsLoading(false);
     }
   };
 
@@ -108,6 +100,11 @@ function LoginPage({
           )}
           {wrongLoginInfo ? handleError : <div></div>}
         </Form>
+      </div>
+      <div className="learn-more-container">
+        <Link className="learn-more" to="/about">
+          Not sure it's safe? Click here to learn more.
+        </Link>
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ function SkinCards({ handleSelectCallback, selectedSkins }) {
   return <div className="skin-container">{skinCards}</div>;
 }
 
-function NotifyPage({ handleSelectCallback, selectedSkins }) {
+function WishListPage({ handleSelectCallback, selectedSkins }) {
   const [phone, setPhone] = useState("");
   const [disable, setDisable] = useState(false);
   const [wrongPhone, setWrongPhone] = useState(false);
@@ -71,7 +71,7 @@ function NotifyPage({ handleSelectCallback, selectedSkins }) {
 
   return (
     <div className="notify-page page-padding">
-      <h1 className="valorant-heading center">Notify Me</h1>
+      <h1 className="valorant-heading center">WISH LIST</h1>
       <h2 className="center">Enter your mobile number to get notify</h2>
       <div className="phone-form-container">
         <div>
@@ -105,4 +105,4 @@ function NotifyPage({ handleSelectCallback, selectedSkins }) {
   );
 }
 
-export default NotifyPage;
+export default WishListPage;

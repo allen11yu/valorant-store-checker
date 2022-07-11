@@ -8,7 +8,7 @@ import AboutPage from "./AboutPage";
 import LoginPage from "./LoginPage";
 import StorePage from "./StorePage";
 import BundlePage from "./BundlePage";
-import NotifyPage from "./NotifyPage";
+import WishListPage from "./WishListPage";
 
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -18,13 +18,6 @@ function App() {
   const [playerName, setPlayerName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [bundles, setBundles] = useState([]);
-
-  const dummyOffers = [
-    "ef773863-472d-4d81-e50e-1d887cea40f4",
-    "63a65008-4266-1117-fe3d-d1bf290b7da9",
-    "2607b2c6-45f7-e75e-94f8-58a738773d5c",
-    "37851a69-4719-d8ae-d305-49bcee8d853c",
-  ];
 
   const fetchBundles = async () => {
     await fetch("https://api.valtracker.gg/bundles")
@@ -43,16 +36,12 @@ function App() {
 
   const handleSelect = (uuid, skin) => {
     let temp = new Map(selectedSkins);
-    console.log("im clicked");
 
     if (temp.has(uuid)) {
-      console.log("deselecting skin");
       temp.delete(uuid);
     } else {
-      console.log("selecting skin");
       temp.set(uuid, skin);
     }
-    console.log(temp);
     setSelectedSkins(temp);
   };
 
@@ -88,6 +77,7 @@ function App() {
               storeTimeLeft={storeTimeLeft}
               playerName={playerName}
               setIsLoadingCallback={setIsLoading}
+              bundles={bundles}
             />
           ) : (
             <Redirect to="/login" />
@@ -103,7 +93,7 @@ function App() {
         </Route>
 
         <Route exact path="/notify">
-          <NotifyPage
+          <WishListPage
             handleSelectCallback={handleSelect}
             selectedSkins={selectedSkins}
           />
