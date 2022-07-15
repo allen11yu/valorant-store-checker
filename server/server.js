@@ -5,6 +5,15 @@ const multer = require("multer");
 const cors = require("cors");
 const { Agent } = require("https");
 const { json } = require("express");
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  user: "postgres",
+  password: "something",
+  host: "localhost",
+  port: 5432,
+  database: "valorantstorechecker",
+});
 
 /** for application/x-www-form-urlencoded */
 app.use(express.urlencoded({ extended: true })); // built-in middleware
@@ -33,7 +42,7 @@ const agent = new Agent({
   minVersion: "TLSv1.2",
 });
 
-// Endpoint
+// Endpoints
 app.post("/auth", async function (req, res) {
   let username = req.body.username;
   let password = req.body.password;
@@ -53,13 +62,13 @@ app.post("/auth", async function (req, res) {
   let result = {
     displayName: "",
     store: "",
+    puuid: "",
   };
 
   // creating login session
   try {
     loginSession = await createLoginSession();
     asid = getCookie(loginSession, "asid");
-    //console.log(asid);
   } catch (error) {
     res.type("text");
     res.status(500).send("An error occurred on the server. Try again later.");
@@ -72,6 +81,10 @@ app.post("/auth", async function (req, res) {
     puuid = getCookie(authRes, "sub").split("=")[1];
     authResJson = await authRes.json();
     accessToken = getAccessToken(authResJson.response.parameters.uri);
+    result.puuid = puuid;
+
+    let playerInfo = await getPlayerInfo(puuid);
+    await updatePlayerInfo(playerInfo.length !== 0, puuid, ssid);
   } catch (error) {
     res.type("text");
     res.status(500).send("An error occurred on the server. Try again later.");
@@ -89,7 +102,12 @@ app.post("/auth", async function (req, res) {
 
   // obtaining player username
   try {
-    playerName = await getDisplayName(accessToken, entitlementToken, puuid, ssid);
+    playerName = await getDisplayName(
+      accessToken,
+      entitlementToken,
+      puuid,
+      ssid
+    );
     result.displayName = playerName;
   } catch (error) {
     res.type("text");
@@ -107,7 +125,160 @@ app.post("/auth", async function (req, res) {
   res.send(result);
 });
 
+app.post("/check", async function (req, res) {
+  let ssid = req.body.ssid;
+  let puuid = req.body.puuid;
+  let reauthRes;
+  let accessToken;
+  let entitlementToken;
+  let entitlementRes;
+  let entitlementResJson;
+  let storeJson;
+  let storeOffers;
+  try {
+    reauthRes = await cookieReauth(ssid);
+    accessToken = getAccessToken(reauthRes.headers.raw().location[0]);
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+
+  // obtaining entitlement token
+  try {
+    entitlementRes = await getEntitlement(accessToken, ssid);
+    entitlementResJson = await entitlementRes.json();
+    entitlementToken = entitlementResJson.entitlements_token;
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+
+  try {
+    storeJson = await getStore(accessToken, entitlementToken, puuid, ssid);
+    storeOffers = storeJson.SkinsPanelLayout.SingleItemOffers;
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+  res.send(storeOffers);
+});
+
+// test endpoint -- currently testing player found or not.
+app.post("/test", async function (req, res) {
+  let puuid = req.body.puuid;
+  let ssid = req.body.ssid;
+  try {
+    let playerInfo = await getPlayerInfo(puuid);
+    let result = await updatePlayerInfo(playerInfo.length !== 0, puuid, ssid);
+    res.send(result);
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+});
+
+app.post("/getphone", async function (req, res) {
+  let puuid = req.body.puuid;
+  try {
+    let query = "SELECT phone_number FROM players WHERE puuid = $1";
+    let playerPhone = await pool.query(query, [puuid]);
+    res.send(playerPhone.rows[0]);
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+});
+
+// get wishlish weapons
+app.post("/wishlist", async function (req, res) {
+  let puuid = req.body.puuid;
+  try {
+    let query = "SELECT uuid FROM wishlists WHERE puuid = $1";
+    let selectedSkins = await pool.query(query, [puuid]);
+    let selectedSkinsArr = [];
+    for (let i = 0; i < selectedSkins.rows.length; i++) {
+      selectedSkinsArr.push(selectedSkins.rows[i].uuid);
+    }
+    res.send({
+      wishlist: selectedSkinsArr,
+    });
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+});
+
+// add to wishlist endpoint
+app.post("/add", async function (req, res) {
+  let uuid = req.body.uuid; // level uuid
+  let puuid = req.body.puuid; // player id
+  try {
+    let query =
+      "INSERT INTO wishlists(puuid, uuid) VALUES ($1, $2) RETURNING *";
+    let values = [puuid, uuid];
+    let inserted = await pool.query(query, values);
+    res.send(inserted.rows);
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+});
+
+// delete skin from wishlist endpoint
+app.post("/delete", async function (req, res) {
+  let uuid = req.body.uuid; // level uuid
+  let puuid = req.body.puuid; // player id
+  try {
+    let query =
+      "DELETE FROM wishlists WHERE puuid = $1 AND uuid = $2 RETURNING *";
+    let values = [puuid, uuid];
+    let deleted = await pool.query(query, values);
+    res.send(deleted.rows);
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+});
+
+// update phone number endpoint
+app.post("/updatephone", async function (req, res) {
+  let newPhone = req.body.phone;
+  let puuid = req.body.puuid;
+
+  try {
+    let query =
+      "UPDATE players SET phone_number = $1 WHERE puuid = $2 RETURNING *";
+    let values = [newPhone, puuid];
+    let updated = await pool.query(query, values);
+    res.send(updated.rows[0]);
+  } catch (error) {
+    res.type("text");
+    res.status(500).send("An error occurred on the server. Try again later.");
+  }
+});
+
 // Functions
+async function updatePlayerInfo(isFound, puuid, ssid) {
+  let updated;
+  if (isFound) {
+    console.log("player found! Updating cookie.");
+    let query = "UPDATE players SET ssid = $1 WHERE puuid = $2";
+    let values = [ssid, puuid];
+    updated = await pool.query(query, values);
+  } else {
+    console.log("player not found! Inserting new player.");
+    let query = "INSERT INTO players(puuid, ssid) VALUES ($1, $2)";
+    let values = [puuid, ssid];
+    updated = await pool.query(query, values);
+  }
+}
+
+async function getPlayerInfo(puuid) {
+  let query = "SELECT * FROM players WHERE puuid = $1";
+  let playerInfo = await pool.query(query, [puuid]);
+  return playerInfo.rows;
+}
+
 function getAccessToken(uri) {
   let url = new URL(uri);
   let params = new URLSearchParams(url.hash.substring(1));
@@ -215,6 +386,29 @@ async function getDisplayName(accessToken, entitlementToken, puuid, ssid) {
   }).then((res) => res.json());
   let displayName = playerResJson[0].GameName + " #" + playerResJson[0].TagLine;
   return displayName;
+}
+
+async function cookieReauth(ssid) {
+  let reauthUrl =
+    "https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1";
+
+  let reauthRes = await fetch(reauthUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": userAgent,
+      Cookie: `${ssid}`,
+    },
+    agent: agent,
+    redirect: "manual",
+  });
+
+  return reauthRes;
+  // if(reauthRes.headers.location.startsWith("/login")) {
+  //   console.log("invalid cookie");
+  // } else { // valid cookie
+
+  // }
 }
 
 const PORT = process.env.PORT || 8000;

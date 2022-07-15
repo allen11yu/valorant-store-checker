@@ -1,12 +1,35 @@
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
 import validator from "validator";
 import { Form, FloatingLabel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as filledStar } from "@fortawesome/free-solid-svg-icons";
 
-function SkinCards({ handleSelectCallback, selectedSkins }) {
+function SkinCards({ handleSelectCallback, bundles, wishlist }) {
+  const getSkinInfo = (bundles, uuid) => {
+    let skinInfo = {
+      name: "",
+      price: "",
+      icon: "",
+    };
+    for (let i = 0; i < bundles.length; i++) {
+      let bundleWeapons = bundles[i].weapons;
+      for (let j = 0; j < bundleWeapons.length; j++) {
+        let currWeapon = bundleWeapons[j];
+        if (currWeapon.levels[0].uuid === uuid) {
+          skinInfo.name = currWeapon.name;
+          skinInfo.price = currWeapon.price;
+          skinInfo.icon = currWeapon.levels[0].displayIcon;
+        }
+      }
+    }
+    return skinInfo;
+  };
+
   let skinCards = [];
-  for (let [uuid, skin] of selectedSkins.entries()) {
+  for (let i = 0; i < wishlist.length; i++) {
+    let uuid = wishlist[i];
+    let skin = getSkinInfo(bundles, uuid);
+
     let skinCard = (
       <div className="skin-card" key={uuid}>
         <div className="skin-img">
@@ -19,7 +42,7 @@ function SkinCards({ handleSelectCallback, selectedSkins }) {
             className="info-text"
             icon={filledStar}
             onClick={() => {
-              handleSelectCallback(uuid, skin);
+              handleSelectCallback(uuid);
             }}
           />
         </div>
@@ -30,7 +53,7 @@ function SkinCards({ handleSelectCallback, selectedSkins }) {
   return <div className="skin-container">{skinCards}</div>;
 }
 
-function WishListPage({ handleSelectCallback, selectedSkins }) {
+function WishListPage({ handleSelectCallback, playerId, bundles, wishlist }) {
   const [phone, setPhone] = useState("");
   const [disable, setDisable] = useState(false);
   const [wrongPhone, setWrongPhone] = useState(false);
@@ -43,11 +66,48 @@ function WishListPage({ handleSelectCallback, selectedSkins }) {
     setDisable(false);
   };
 
+  const handleData = (data) => {
+    if (data["phone_number"] !== null) {
+      setPhone(data["phone_number"]);
+      setWrongPhone(false);
+      setDisable(true);
+    } else {
+      setPhone("");
+    }
+  };
+
+  const getPhone = async (puuid) => {
+    await fetch("/getphone", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ puuid }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        handleData(data);
+      });
+  };
+
+  const updatePhone = async (puuid, phone) => {
+    await fetch("/updatephone", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ puuid, phone }),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data));
+  };
+
   const handleSave = () => {
     if (validator.isMobilePhone(phone, ["en-US"])) {
       console.log("valid phone number");
       setWrongPhone(false);
       setDisable(true);
+      updatePhone(playerId, phone);
     } else {
       console.log("not valid phone number");
       setWrongPhone(true);
@@ -69,6 +129,9 @@ function WishListPage({ handleSelectCallback, selectedSkins }) {
     );
   }
 
+  useEffect(() => {
+    getPhone(playerId);
+  }, []);
   return (
     <div className="notify-page page-padding">
       <h1 className="valorant-heading center">WISH LIST</h1>
@@ -88,6 +151,7 @@ function WishListPage({ handleSelectCallback, selectedSkins }) {
                 onChange={(e) => {
                   setPhone(e.target.value);
                 }}
+                defaultValue={phone}
                 disabled={disable}
                 readOnly={disable}
               />
@@ -99,7 +163,9 @@ function WishListPage({ handleSelectCallback, selectedSkins }) {
       {wrongPhone ? handleWrongPhone : <div></div>}
       <SkinCards
         handleSelectCallback={handleSelectCallback}
-        selectedSkins={selectedSkins}
+        bundles={bundles}
+        playerId={playerId}
+        wishlist={wishlist}
       />
     </div>
   );

@@ -10,21 +10,39 @@ function LoginPage({
   setPlayerNameCallback,
   setIsLoadingCallback,
   isLoading,
+  setPlayerIdCallback,
+  setWishlistCallback,
 }) {
   const [wrongLoginInfo, setWrongLoginInfo] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("imafan13");
+  const [password, setPassword] = useState("Valorantpassword1");
   const history = useHistory();
 
   const handleData = (data) => {
     console.log(data);
+    setPlayerIdCallback(data.puuid);
     setPlayerNameCallback(data.displayName);
     setStoreOffersCallback(data.store.SingleItemOffers);
     setStoreTimeLeftCallback(
       data.store.SingleItemOffersRemainingDurationInSeconds
     );
     setIsLoginCallback(true);
+    fetchWishlist(data.puuid);
     history.push("/store");
+  };
+
+  const fetchWishlist = async (puuid) => {
+    await fetch("/wishlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ puuid }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setWishlistCallback(data.wishlist);
+      });
   };
 
   const userLogin = async (username, password) => {

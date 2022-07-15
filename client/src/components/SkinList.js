@@ -5,28 +5,27 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as outlineStar } from "@fortawesome/free-regular-svg-icons";
 import { faStar as filledStar } from "@fortawesome/free-solid-svg-icons";
 
-function SkinCards({ bundleSkins, handleSelectCallback, selectedSkins }) {
+function SkinCards({
+  bundleSkins,
+  handleSelectCallback,
+  selectedSkins,
+  wishlist,
+}) {
   let skinCards = [];
   skinCards = bundleSkins.map((skin, index) => {
-    let uuid = skin.uuid;
-    let icon = skin.chromas[0].fullRender;
+    let uuid = skin.levels[0].uuid;
+    let icon = skin.levels[0].displayIcon;
     let name = skin.name;
     let price = skin.price;
 
-    let skinObj = {
-      name: name,
-      price: price,
-      icon: icon,
-      index: index,
-    };
     let starStatus = null;
-    if (selectedSkins.has(uuid)) {
+    if (wishlist.includes(uuid)) {
       starStatus = (
         <FontAwesomeIcon
           className="info-text"
           icon={filledStar}
           onClick={() => {
-            handleSelectCallback(uuid, skinObj);
+            handleSelectCallback(uuid);
           }}
         />
       );
@@ -36,7 +35,7 @@ function SkinCards({ bundleSkins, handleSelectCallback, selectedSkins }) {
           className="info-text"
           icon={outlineStar}
           onClick={() => {
-            handleSelectCallback(uuid, skinObj);
+            handleSelectCallback(uuid);
           }}
         />
       );
@@ -58,7 +57,7 @@ function SkinCards({ bundleSkins, handleSelectCallback, selectedSkins }) {
   return <div>{skinCards}</div>;
 }
 
-function SkinList({ handleSelectCallback, selectedSkins, bundles }) {
+function SkinList({ handleSelectCallback, selectedSkins, bundles, wishlist }) {
   const exclusiveBundles = ["Champions 2021", "Arcane", "Pride"];
 
   let skinCards = [];
@@ -77,6 +76,7 @@ function SkinList({ handleSelectCallback, selectedSkins, bundles }) {
               bundleSkins={bundle.weapons}
               handleSelectCallback={handleSelectCallback}
               selectedSkins={selectedSkins}
+              wishlist={wishlist}
             />
           </Accordion.Body>
         </Accordion.Item>

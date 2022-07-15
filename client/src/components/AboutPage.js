@@ -10,13 +10,13 @@ function AboutPage() {
         <p>
           Hello! My name is Allen. Valorant is one of my favorite games to play
           with friends. Sometimes, gamers have other things to prioritize. So to
-          prevent having to launch the game everytime the store refreshes, I
+          prevent having to launch the game every time the store refreshes, I
           have created a web application that shows the current store offers. In
-          addition, there is also a notification feature that allows players to
-          "wish" the skins. Once any of the skins appeared in the store, a text
-          message will be send to your phone. If you don't feel like playing
-          Valorant or can't play at the moment, but want to check what is in
-          your store. This tool is perfect for you.
+          addition, there is also a notification feature that allow players to
+          add skins to the wishlist. Once any wishlisted skins appear in the
+          store, a text message will be sent to that player's phone. If you
+          don't feel like playing Valorant or can't play at the moment but want
+          to check what is in your store. This tool is perfect for you.
         </p>
         <p>
           As for safety concerns, the source code for the entire application is
